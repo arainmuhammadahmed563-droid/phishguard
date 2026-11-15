@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% block sub %}Check a single URL with the ML + rules engine{% endblock %}
+{% block body %}
+<div class="card"><input type="text" id="u" placeholder="http://paypal-verify.xyz/login" autofocus>
+<div class="row"><button class="btn" id="go" onclick="check()">Check URL</button>
+<label class="mut">Strictness <input type="range" id="t" min="0.1" max="0.9" step="0.05" value="0.5"> <span id="tv">0.50</span></label></div>
+<div style="margin-top:10px"><span class="mut">Try:</span>
+<span class="chip">https://www.google.com</span><span class="chip">http://paypal.com.evil-site.xyz/login</span><span class="chip">http://45.33.12.9/paypal/login.php</span></div></div>
+<div class="card" id="res" hidden><h2 id="h" style="margin-top:0"></h2><div class="meter"><i id="m"></i></div>
+<div class="mut" id="s"></div><ul id="r"></ul></div>
+{% endblock %}{% block js %}<script>
+$('t').oninput=()=>$('tv').textContent=(+$('t').value).toFixed(2);
+document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{$('u').value=c.textContent;check()});
+$('u').addEventListener('keydown',e=>{if(e.key==='Enter')check()});
+async function check(){const url=$('u').value.trim();if(!url)return;$('go').disabled=true;
+ try{const d=await api('/api/check',{url,threshold:+$('t').value});const bad=d.label==='PHISHING';
+  $('res').hidden=false;$('h').textContent=(bad?'⚠️ ':'✅ ')+d.label+' — '+d.risk_level+' risk';$('h').className=bad?'bad':'good';
+  $('m').style.width=pct(d.phishing_probability);$('m').style.background=COL[d.risk_level];
+  $('s').textContent='Phishing probability '+pct(d.phishing_probability)+'  •  ML '+pct(d.ml_probability)+'  •  Rules '+pct(d.rule_score)+(d.trusted_domain?'  •  trusted domain':'');
+  $('r').innerHTML='';d.reasons.forEach(x=>$('r').appendChild(el('li','',x)));
+ }catch(e){alert(e.message)}finally{$('go').disabled=false}}
+const q=new URLSearchParams(location.search).get('u');if(q){$('u').value=q;check()}
+</script>{% endblock %}

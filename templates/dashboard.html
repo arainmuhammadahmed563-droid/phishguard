@@ -1,0 +1,39 @@
+{% extends "base.html" %}{% block sub %}Overview of all scans and model health{% endblock %}
+{% block body %}
+<div class="grid">
+<div class="card stat"><small>Total scans</small><b id="t">0</b></div>
+<div class="card stat"><small>Phishing found</small><b class="bad" id="p">0</b></div>
+<div class="card stat"><small>Legitimate</small><b class="good" id="l">0</b></div>
+<div class="card stat"><small>Model accuracy</small><b id="a">-</b></div></div>
+
+<div class="card"><b>Quick scan</b>
+<div class="row"><input type="text" id="u" placeholder="http://paypal-verify.xyz/login" style="flex:1">
+<button class="btn" id="go" onclick="quick()">Check</button></div>
+<div id="res" hidden style="margin-top:12px"><h2 id="h" style="margin:0 0 8px"></h2>
+<div class="meter"><i id="m"></i></div><div class="mut" id="s"></div><ul id="r"></ul></div></div>
+
+<div class="grid" style="grid-template-columns:1fr 1.4fr">
+<div class="card"><b>Risk distribution</b><div class="bars" id="risk"></div></div>
+<div class="card"><b>Latest scans</b><table><tbody id="rec"></tbody></table></div></div>
+{% endblock %}{% block js %}<script>
+async function load(){
+ const s=await api('/api/stats');$('t').textContent=s.total;$('p').textContent=s.phishing;$('l').textContent=s.legit;
+ const mx=Math.max(1,...Object.values(s.risk));$('risk').innerHTML='';$('rec').innerHTML='';
+ for(const k in s.risk){const d=el('div');const sp=el('span','',k+' ('+s.risk[k]+')');const i=el('i');i.style.width=(s.risk[k]/mx*100)+'%';i.style.background=COL[k];d.append(sp,i);$('risk').appendChild(d)}
+ (await api('/api/history')).slice(0,6).forEach(h=>row($('rec'),[{t:h.url,cls:'u',title:h.url},{t:pct(h.prob),cls:h.risk}]));
+ try{$('a').textContent=pct((await api('/api/metrics')).accuracy)}catch(e){}
+}
+async function quick(){
+ const url=$('u').value.trim();if(!url)return;$('go').disabled=true;
+ try{
+  const d=await api('/api/check',{url,threshold:0.5});const bad=d.label==='PHISHING';
+  $('res').hidden=false;$('h').textContent=(bad?'⚠️ ':'✅ ')+d.label+' — '+d.risk_level+' risk';$('h').className=bad?'bad':'good';
+  $('m').style.width=pct(d.phishing_probability);$('m').style.background=COL[d.risk_level];
+  $('s').textContent='Phishing probability '+pct(d.phishing_probability)+'  •  ML '+pct(d.ml_probability)+'  •  Rules '+pct(d.rule_score);
+  $('r').innerHTML='';d.reasons.forEach(x=>$('r').appendChild(el('li','',x)));
+  load();
+ }catch(e){alert(e.message)}finally{$('go').disabled=false}
+}
+$('u').addEventListener('keydown',e=>{if(e.key==='Enter')quick()});
+load();
+</script>{% endblock %}

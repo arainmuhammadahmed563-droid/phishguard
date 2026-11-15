@@ -1,0 +1,63 @@
+{
+  "model": "random_forest",
+  "accuracy": 1.0,
+  "f1": 1.0,
+  "roc_auc": 1.0,
+  "confusion_matrix": [
+    [
+      881,
+      0
+    ],
+    [
+      0,
+      1200
+    ]
+  ],
+  "cv_f1": {
+    "random_forest": 1.0,
+    "gradient_boosting": 1.0,
+    "logistic_regression": 1.0
+  },
+  "top_features": [
+    [
+      "risky_tld",
+      0.2011
+    ],
+    [
+      "host_digit_ratio",
+      0.1726
+    ],
+    [
+      "num_suspicious_words",
+      0.1376
+    ],
+    [
+      "num_digits",
+      0.1048
+    ],
+    [
+      "url_entropy",
+      0.0627
+    ],
+    [
+      "has_https",
+      0.0571
+    ],
+    [
+      "longest_token_len",
+      0.0363
+    ],
+    [
+      "brand_mismatch",
+      0.0352
+    ],
+    [
+      "url_length",
+      0.0302
+    ],
+    [
+      "suspicious_ext",
+      0.0285
+    ]
+  ]
+}

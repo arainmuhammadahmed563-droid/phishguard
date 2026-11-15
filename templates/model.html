@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block sub %}How well the trained model performs{% endblock %}
+{% block body %}
+<div class="grid"><div class="card stat"><small>Model</small><b id="n" style="font-size:1.2rem">-</b></div>
+<div class="card stat"><small>Accuracy</small><b id="a">-</b></div><div class="card stat"><small>F1</small><b id="f">-</b></div><div class="card stat"><small>ROC-AUC</small><b id="r">-</b></div></div>
+<div class="grid" style="grid-template-columns:1fr 1.4fr"><div class="card"><b>Confusion matrix</b><div class="cm" style="margin-top:12px" id="cm"></div></div>
+<div class="card"><b>Top features</b><div class="bars" id="ft"></div></div></div>
+<p class="mut">⚠️ Demo data is synthetic, so scores near 100% are expected. Train on a real dataset for realistic numbers.</p>
+{% endblock %}{% block js %}<script>
+(async()=>{try{const m=await api('/api/metrics');$('n').textContent=(m.model||'random_forest').replace('_',' ');
+ $('a').textContent=pct(m.accuracy);$('f').textContent=m.f1!=null?pct(m.f1):'-';$('r').textContent=m.roc_auc!=null?pct(m.roc_auc):'-';
+ [['TN',m.confusion_matrix[0][0]],['FP',m.confusion_matrix[0][1]],['FN',m.confusion_matrix[1][0]],['TP',m.confusion_matrix[1][1]]].forEach(([k,v])=>{const d=el('div');d.append(el('b','',v),el('span','mut',k));$('cm').appendChild(d)});
+ const mx=Math.max(...m.top_features.map(x=>x[1]));m.top_features.forEach(([k,v])=>{const d=el('div'),i=el('i');i.style.width=(v/mx*100)+'%';d.append(el('span','',k),i);$('ft').appendChild(d)})
+}catch(e){$('n').textContent='Run train.py'}})();
+</script>{% endblock %}

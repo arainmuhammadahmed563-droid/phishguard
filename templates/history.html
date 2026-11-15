@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% block sub %}Every URL checked so far (last 200){% endblock %}
+{% block body %}
+<div class="card"><div class="row" style="margin:0 0 12px"><select id="f" style="width:200px" onchange="load()"><option value="">All</option><option>PHISHING</option><option>LEGITIMATE</option></select>
+<button class="btn ghost" onclick="clr()">Clear history</button></div>
+<table><thead><tr><th>Time</th><th>URL</th><th>Result</th><th>Prob.</th></tr></thead><tbody id="tb"></tbody></table><p class="mut" id="e" hidden>No scans yet.</p></div>
+{% endblock %}{% block js %}<script>
+async function load(){const d=await api('/api/history'+($('f').value?'?label='+$('f').value:''));$('tb').innerHTML='';$('e').hidden=d.length>0;
+ d.forEach(h=>row($('tb'),[{t:new Date(h.ts*1000).toLocaleString(),cls:'mut'},{t:h.url,cls:'u',title:h.url},{t:h.label,cls:h.label==='PHISHING'?'bad':'good'},{t:pct(h.prob),cls:h.risk}]))}
+async function clr(){if(confirm('Delete all history?')){await api('/api/history/clear',{});load()}}
+load();
+</script>{% endblock %}

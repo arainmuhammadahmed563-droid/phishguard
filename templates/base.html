@@ -1,0 +1,19 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }} · PhishGuard</title>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('theme')||'aurora'}catch(e){}</script>
+<link rel="manifest" href="/manifest.json"><meta name="theme-color" content="#0b1020"><link rel="icon" href="/static/icons/icon-192.png"><link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head><body>
+<aside><div class="brand">🛡️ Phish<span>Guard</span></div>
+{% for path,(t,name) in pages.items() %}<a href="{{ path }}" class="{{ 'on' if path==active }}">{{ name }}</a>{% endfor %}<div class="tl">Theme</div><div class="themes"><button data-t="aurora" title="Aurora"></button><button data-t="ocean" title="Ocean"></button><button data-t="sunset" title="Sunset"></button></div></aside>
+<main><h1>{{ title }}</h1><p class="sub">{% block sub %}{% endblock %}</p>{% block body %}{% endblock %}</main>
+<script>
+const $=id=>document.getElementById(id);
+const COL={LOW:'linear-gradient(90deg,#00c896,#35f0b0)',MEDIUM:'linear-gradient(90deg,#ff9f43,#ffd166)',HIGH:'linear-gradient(90deg,#ff3d81,#ff8a5c)'};
+async function api(p,body){const r=await fetch(p,body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{});
+  const d=await r.json();if(!r.ok)throw new Error(d.error||'Error');return d}
+function el(t,cls,txt){const e=document.createElement(t);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+function row(tb,cells){const tr=el('tr');cells.forEach(c=>{const td=el('td',c.cls,c.t);if(c.title)td.title=c.title;tr.appendChild(td)});tb.appendChild(tr)}
+const pct=p=>(p*100).toFixed(1)+'%';
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));
+</script>{% block js %}{% endblock %}</body></html>

@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% block sub %}Scan up to 50 URLs at once and export the results{% endblock %}
+{% block body %}
+<div class="card"><textarea id="ta" placeholder="One URL per line"></textarea>
+<div class="row"><button class="btn" id="go" onclick="run()">Scan all</button>
+<input type="file" id="f" accept=".txt,.csv" class="mut"><button class="btn ghost" id="dl" hidden onclick="csv()">Download CSV</button></div></div>
+<div class="card" id="res" hidden><div id="sum" class="mut"></div><table><thead><tr><th>URL</th><th>Result</th><th>Risk</th><th>Prob.</th></tr></thead><tbody id="tb"></tbody></table></div>
+{% endblock %}{% block js %}<script>
+let out=[];
+$('f').onchange=async e=>{$('ta').value=await e.target.files[0].text()};
+async function run(){const urls=$('ta').value.split('\n').map(x=>x.trim()).filter(Boolean);if(!urls.length)return;$('go').disabled=true;
+ try{const d=await api('/api/batch',{urls});out=d.results;$('res').hidden=false;$('dl').hidden=false;$('tb').innerHTML='';
+  $('sum').textContent=d.count+' scanned, '+d.phishing+' flagged as phishing';
+  out.forEach(r=>row($('tb'),[{t:r.url,cls:'u',title:r.url},{t:r.label,cls:r.label==='PHISHING'?'bad':'good'},{t:r.risk_level,cls:r.risk_level},{t:pct(r.phishing_probability)}]))
+ }catch(e){alert(e.message)}finally{$('go').disabled=false}}
+function csv(){const rows=[['url','label','risk','probability'],...out.map(r=>[r.url,r.label,r.risk_level,r.phishing_probability])];
+ const t=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+ const a=el('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/csv'}));a.download='scan_results.csv';a.click()}
+</script>{% endblock %}

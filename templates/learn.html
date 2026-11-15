@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block sub %}Spot phishing yourself and use the API{% endblock %}
+{% block body %}
+<div class="card"><b>🚩 Red flags</b><ul><li>Brand name in the URL but not the real domain (<code>paypal.com.evil.xyz</code>)</li><li>Raw IP address or <code>@</code> in the link</li><li>Risky TLDs (.xyz, .top, .tk) and many hyphens or subdomains</li><li>Urgent words: verify, suspend, unlock, login</li><li>Shortened links that hide the destination</li></ul></div>
+<div class="card"><b>✅ Stay safe</b><ul><li>Type the official site address yourself instead of clicking links</li><li>Never share OTP or passwords by link, SMS or email</li><li>Enable two-factor authentication</li></ul></div>
+<div class="card"><b>API</b><pre>POST /api/check   {"url":"http://secure-apple123.top/login","threshold":0.5}
+POST /api/batch   {"urls":["a.com","b.com"]}
+GET  /api/stats   /api/history   /api/metrics   /api/health</pre></div>
+{% endblock %}
